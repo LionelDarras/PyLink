@@ -75,6 +75,10 @@ class TCPLink(Link):
             self._socket.settimeout(self.timeout)
             LOGGER.info('new %s was initialized' % self)
 
+    def settimeout(self, timeout):
+        self.timeout = timeout
+        self.socket.settimeout(self.timeout)
+
     def close(self):
         '''Close the socket.'''
         if self._socket is not None:
@@ -176,6 +180,11 @@ class SerialLink(Link):
                                     bytesize=self.bytesize, parity=self.parity,
                                     stopbits=self.stopbits)
             LOGGER.info('new %s was initialized' % self)
+
+    def settimeout(self, timeout):
+        self.timeout = timeout
+        self.serial.timeout = self.timeout
+
 
     def close(self):
         '''Close the serial connection.'''
