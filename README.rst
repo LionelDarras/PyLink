@@ -1,6 +1,6 @@
-==========
-PyVPDriver
-==========
+======
+PyLink
+======
 
 Universal communication interface using File-Like API.
 
@@ -21,4 +21,4 @@ Examples :
 
   >>> link = link_from_url("serial:/dev/ttyUSB0:115200:8N1")
   >>> print link
-  <SerialLink serial:/dev/ttyUSB0:19200:8N1>
+  <SerialLink serial:/dev/ttyUSB0:115200:8N1>
