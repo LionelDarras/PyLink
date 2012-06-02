@@ -36,7 +36,7 @@ class Link(object):
         if is_byte:
             LOGGER.info("%s : <%s>" % (message, self.byte_to_string(data)))
         else:
-            LOGGER.info("%s : <%s>" % (message,repr(data)))
+            LOGGER.info("%s : <%s>" % (message, repr(data)))
 
     def __del__(self):
         '''Close link when object is deleted.'''
