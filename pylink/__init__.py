@@ -45,5 +45,4 @@ def link_from_url(url):
     if link is None:
         raise ValueError('Bad url link sepecified')
     else:
-        link.open()
         return link
