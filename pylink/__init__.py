@@ -12,7 +12,7 @@
 VERSION = '0.1dev'
 __version__ = VERSION
 
-from .link import TCPLink, SerialLink
+from .link import TCPLink, SerialLink, UDPLink
 from .logger import LOGGER
 
 
