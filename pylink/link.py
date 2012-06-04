@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 '''
     pyvpdriver.link
     ~~~~~~~~~~~~~~~
@@ -32,7 +32,7 @@ class Link(object):
         '''Convert a byte string to it's hex string representation.'''
         return ''.join( [ "%02X " % ord( x ) for x in byte ] ).strip()
 
-    def log(self, message, data, is_byte):
+    def log(self, message, data, is_byte=False):
         if is_byte:
             LOGGER.info("%s : <%s>" % (message, self.byte_to_string(data)))
         else:
@@ -58,20 +58,25 @@ class TCPLink(Link):
     API.'''
     def __init__(self, host, port, timeout=1):
         self.timeout = timeout
-        self.host = host
+        self.host = socket.gethostbyname(host)
         self.port = port
         self._socket = None
 
     @property
+    def address(self):
+        '''Return a tuple of (`host`, `port`).'''
+        return (self.host, self.port)
+
+    @property
     def url(self):
         '''Make a connection url from `host` and `port`.'''
-        return 'tcp:%s:%d' % (self.host, self.port)
+        return 'tcp:%s:%d' % self.address
 
     def open(self):
         '''Open the socket.'''
         if self._socket is None:
             self._socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            self._socket.connect((self.host,self.port))
+            self._socket.connect(self.address)
             self._socket.settimeout(self.timeout)
             LOGGER.info('new %s was initialized' % self)
 
@@ -94,13 +99,13 @@ class TCPLink(Link):
 
     def write(self, data, is_byte=False):
         '''Write all `data` to socket.'''
-        if sys.version_info[0] >= 3:
-            # Python 3
-            self.socket.sendall(bytes(data, encoding='utf8'))
-        else:
-            # Python 2
-            self.socket.sendall(data)
-        self.log("Write", data, is_byte)
+        if not isinstance(data, bytes):
+            if sys.version_info[0] >= 3:
+                data = bytes("%s" % data, encoding='utf-8')
+            else:
+                data = bytes(unicode("%s" % data).encode('utf-8'))
+        self.send_to_socket(data)
+        self.log("Write", data)
 
     def read(self, size=None, is_byte=False):
         '''Read data from socket. The maximum amount of data to be received at
@@ -108,7 +113,7 @@ class TCPLink(Link):
         convert to hexadecimal array.'''
         size = size or self.MAX_STRING_SIZE
         data = self.recv_timeout(size, is_byte)
-        self.log("Read", data, is_byte)
+        self.log("Read", data)
         return data
 
     def recv_timeout(self, size, is_byte=False):
@@ -128,7 +133,7 @@ class TCPLink(Link):
             if time.time()- begin > timeout:
                 break
             try:
-                data = self.socket.recv(size)
+                data = self.recv_from_socket(size)
                 if data:
                     total_data.append(data)
                     size = size - len(data)
@@ -143,11 +148,54 @@ class TCPLink(Link):
                 time.sleep(0.1)
                 pass
         self.socket.settimeout(self.timeout)
-        if is_byte:
-            return b"".join(total_data)
-        else:
-            return b"".join(total_data).decode("utf-8")
+        if not is_byte:
+            # Try to convert into str
+            try:
+                if sys.version_info[0] >= 3:
+                    # Python 3
+                    return str(b"".join(total_data), encoding='utf8')
+                else:
+                    # Python 2
+                    return unicode(b"".join(total_data), encoding='utf8')
+            except:
+                pass
+        #else, return bytes
+        return b"".join(total_data)
 
+    def send_to_socket(self, data):
+        '''Send data to TCP socket.'''
+        self.socket.sendall(data)
+
+    def recv_from_socket(self, size):
+        '''Read data from TCP socket.'''
+        return self.socket.recv(size)
+
+
+class UDPLink(TCPLink):
+    '''TCPLink class allows UDP/IP protocol communication with File-like
+    API.'''
+
+    @property
+    def url(self):
+        '''Make a connection url from `host` and `port`.'''
+        return 'udp:%s:%d' % self.address
+
+    def open(self):
+        '''Open the socket.'''
+        if self._socket is None:
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self._socket.settimeout(self.timeout)
+            LOGGER.info('new %s was initialized' % self)
+
+    def send_to_socket(self, data):
+        '''Send data to TCP socket.'''
+        self.socket.sendto(data, self.address)
+
+    def recv_from_socket(self, size):
+        '''Read data from TCP socket.'''
+        data, address = self.socket.recvfrom(size)
+        if address == self.address:
+            return data
 
 class SerialLink(Link):
     '''SerialLink class allows serial communication with File-like API.
