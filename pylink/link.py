@@ -12,6 +12,7 @@ import sys
 import socket
 import time
 import serial
+import binascii
 
 from .logger import LOGGER
 
@@ -30,7 +31,11 @@ class Link(object):
 
     def byte_to_string(self, byte):
         '''Convert a byte string to it's hex string representation.'''
-        return ''.join( [ "%02X " % ord( x ) for x in byte ] ).strip()
+        hexstr = binascii.hexlify(byte)
+        data = []
+        for i in range(0, len(hexstr), 2):
+            data.append(str(hexstr[i:i+2].upper()))
+        return " ".join(data)
 
     def log(self, message, data, is_byte=False):
         if is_byte:
@@ -105,7 +110,7 @@ class TCPLink(Link):
             else:
                 data = bytes(unicode("%s" % data).encode('utf-8'))
         self.send_to_socket(data)
-        self.log("Write", data)
+        self.log("Write", data, is_byte)
 
     def read(self, size=None, is_byte=False):
         '''Read data from socket. The maximum amount of data to be received at
@@ -113,7 +118,7 @@ class TCPLink(Link):
         convert to hexadecimal array.'''
         size = size or self.MAX_STRING_SIZE
         data = self.recv_timeout(size, is_byte)
-        self.log("Read", data)
+        self.log("Read", data, is_byte)
         return data
 
     def recv_timeout(self, size, is_byte=False):
