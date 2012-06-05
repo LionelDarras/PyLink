@@ -10,11 +10,22 @@
 
 '''
 from __future__ import unicode_literals
+import pytest
+from contextlib import contextmanager
 
 from ..link import TCPLink, UDPLink
 from .. import link_from_url
-
 from ..logger import LOGGER
+
+@contextmanager
+def assert_raises(exception_class, message_part):
+    """
+    Check that an exception is raised and its message contains some string.
+    """
+    with pytest.raises(exception_class) as exception:
+        yield
+    message = '%s' % exception
+    assert message_part.lower() in message.lower()
 
 
 class TestUDPLink(object):
@@ -73,3 +84,9 @@ def test_link_from_url():
     link = link_from_url("tcp:localhost:7")
     link.write("hello")
     assert link.read(5) == "hello"
+    with assert_raises(ValueError, 'Bad url link sepecified'):
+        assert link_from_url('')
+    with assert_raises(ValueError, 'Bad url link sepecified'):
+        assert link_from_url('tcp:localhost:10.3')
+    with assert_raises(ValueError, 'Bad url link sepecified'):
+        assert link_from_url('unknow:/dev/ttyUSB0')
