@@ -15,7 +15,9 @@ from contextlib import contextmanager
 
 from ..link import TCPLink, UDPLink
 from .. import link_from_url
-from ..logger import LOGGER
+from ..logger import LOGGER, active_logger
+
+LOGGER = active_logger()
 
 @contextmanager
 def assert_raises(exception_class, message_part):
