@@ -1,0 +1,4 @@
+include CHANGES.rst
+include LICENSE
+include pytest.ini
+include tox.ini
