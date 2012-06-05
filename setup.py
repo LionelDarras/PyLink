@@ -24,19 +24,18 @@ try:
 except:
     pass
 
-REQUIREMENTS = [
-    'pyserial',
-]
 
 setup(
     name='PyLink',
-    version='0.1',
+    version='0.2',
     url='https://github.com/SalemHarrache/PyLink',
     license='BSD',
     description='Universal communication interface using File-Like API',
     long_description=README + '\n\n' + CHANGES,
     author='Salem Harrache',
-    author_email='contact@salem.harrache.info',
+    author_email='salem.harrache@gmail.com',
+    maintainer='Lionel Darras',
+    maintainer_email='Lionel.Darras@obs.ujf-grenoble.fr',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -49,10 +48,12 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Topic :: Internet',
+        'Topic :: Utilities',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     packages=find_packages(),
     zip_safe=False,
-    install_requires=REQUIREMENTS,
-    test_suite='pylink.tests',
+    install_requires=[
+        'pyserial',
+    ]
 )

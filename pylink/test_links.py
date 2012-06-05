@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-    pylink.tests.test_links
+    pylink.test_links
     -----------------------
 
     The pylink test suite.
@@ -9,13 +9,14 @@
     :license: BSD.
 
 '''
+
 from __future__ import unicode_literals
 import pytest
 from contextlib import contextmanager
 
-from ..link import TCPLink, UDPLink
-from .. import link_from_url
-from ..logger import LOGGER, active_logger
+from .link import TCPLink, UDPLink
+from . import link_from_url
+from .logger import LOGGER, active_logger
 
 LOGGER = active_logger()
 
