@@ -32,8 +32,8 @@ Examples
   >>> link.write('Hello')
   2012-06-05 12:44:06,211 INFO: new <TCPLink udp:127.0.0.1:7> was initialized
   2012-06-05 12:44:06,211 INFO: Write : <b'hello'>
-  2012-06-05 12:44:06,312 INFO: Read : <'hello'>
   >>> link.read() == 'Hello'
+  2012-06-05 12:44:06,312 INFO: Read : <'hello'>
   True
 
 ::
