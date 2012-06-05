@@ -14,19 +14,16 @@ from __future__ import unicode_literals
 
 import logging
 
-def init_logger():
-    '''Initialize logger.'''
+def silent_logger():
+    '''Initialize a silent logger.'''
     logger = logging.getLogger('pylink')
-
-    # Default to logging to stderr.
-    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s ')
-
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-
-    logger.addHandler(stream_handler)
-    logger.setLevel(logging.INFO)
-
+    try:
+        from logging import NullHandler
+    except ImportError:
+        class NullHandler(logging.Handler):
+            def emit(self, record):
+                pass
+    logger.addHandler(NullHandler())
     return logger
 
-LOGGER = init_logger()
+LOGGER = silent_logger()
