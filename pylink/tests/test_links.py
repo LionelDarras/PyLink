@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    pylink.tests
-    ------------
+    pylink.tests.test_links
+    -----------------------
 
     The pylink test suite.
 
@@ -18,6 +18,7 @@ from .. import link_from_url
 from ..logger import LOGGER, active_logger
 
 LOGGER = active_logger()
+
 
 @contextmanager
 def assert_raises(exception_class, message_part):

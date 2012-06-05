@@ -2,8 +2,8 @@ PyLink
 ======
 
 Pylink offers a universal communication interface using File-Like API.
-For now, only the *TCP*, *UDP* and *Serial* interfaces are supported.
-The USB and GSM interfaces will be added soon.
+For now, only the **TCP**, **UDP** and **Serial** interfaces are supported.
+The **USB** and **GSM** interfaces will be added soon.
 
 The aim of this project is to allow any type of communication.
 It is best suited for projects that have various ways of communicating

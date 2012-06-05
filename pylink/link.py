@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    pyvpdriver.link
-    ~~~~~~~~~~~~~~~
+    pylink.link
+    -----------
 
     :copyright: Copyright 2012 Salem Harrache and contributors, see AUTHORS.
     :license: BSD.
