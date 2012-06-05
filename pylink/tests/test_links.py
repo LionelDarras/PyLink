@@ -16,7 +16,9 @@ from .. import link_from_url
 
 from ..logger import LOGGER
 
+
 class TestUDPLink(object):
+    '''Suite test for UDP Link'''
 
     def setup_class(self):
         '''Setup common data.'''
@@ -36,8 +38,9 @@ class TestUDPLink(object):
         self.echo_link.write(b'\x06\xFF')
         assert self.echo_link.read(2, is_byte=True) == b'\x06\xFF'
 
-class TestTCPLink(object):
 
+class TestTCPLink(object):
+    '''Suite test for TCP Link'''
     def setup_class(self):
         '''Setup common data.'''
         # echo service
@@ -66,6 +69,7 @@ class TestTCPLink(object):
 
 
 def test_link_from_url():
+    '''Test parssing link from url.'''
     link = link_from_url("tcp:localhost:7")
     link.write("hello")
     assert link.read(5) == "hello"

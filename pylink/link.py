@@ -7,7 +7,9 @@
     :license: BSD.
 
 '''
+
 from __future__ import unicode_literals
+
 import sys
 import socket
 import time
@@ -34,7 +36,7 @@ class Link(object):
         hexstr = binascii.hexlify(byte)
         data = []
         for i in range(0, len(hexstr), 2):
-            data.append(str(hexstr[i:i+2].upper()))
+            data.append(str(hexstr[i:i + 2].upper()))
         return " ".join(data)
 
     def log(self, message, data, is_byte=False):
@@ -80,7 +82,7 @@ class TCPLink(Link):
     def open(self):
         '''Open the socket.'''
         if self._socket is None:
-            self._socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._socket.connect(self.address)
             self._socket.settimeout(self.timeout)
             LOGGER.info('new %s was initialized' % self)
@@ -135,7 +137,7 @@ class TCPLink(Link):
 
         while True:
             #if you got some data, then break after wait sec
-            if time.time()- begin > timeout:
+            if time.time() - begin > timeout:
                 break
             try:
                 data = self.recv_from_socket(size)
@@ -202,6 +204,7 @@ class UDPLink(TCPLink):
         if address == self.address:
             return data
 
+
 class SerialLink(Link):
     '''SerialLink class allows serial communication with File-like API.
     Possible values for the parameter port:
@@ -237,7 +240,6 @@ class SerialLink(Link):
     def settimeout(self, timeout):
         self.timeout = timeout
         self.serial.timeout = self.timeout
-
 
     def close(self):
         '''Close the serial connection.'''

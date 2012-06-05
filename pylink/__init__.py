@@ -37,9 +37,9 @@ def link_from_url(url):
             elif len(link_args) == 4:
                 port = link_args[1]
                 baudrate = int(link_args[2])
-                bytesize=int(link_args[3][1])
-                parity= link_args[3][2]
-                stopbits= int(link_args[3][3])
+                bytesize = int(link_args[3][1])
+                parity = link_args[3][2]
+                stopbits = int(link_args[3][3])
                 link = SerialLink(port, baudrate, bytesize, parity,
                                         stopbits, timeout)
     if link is None:

@@ -14,6 +14,7 @@ from __future__ import unicode_literals
 
 import logging
 
+
 def silent_logger():
     '''Initialize a silent logger.'''
     logger = logging.getLogger('pylink')
@@ -24,6 +25,24 @@ def silent_logger():
             def emit(self, record):
                 pass
     logger.addHandler(NullHandler())
+    return logger
+
+
+def active_logger():
+    '''Initialize a speaking logger with stream handler (stderr).'''
+    logger = logging.getLogger('pyvpdriver')
+
+    logger.setLevel(logging.INFO)
+    logging.getLogger('pylink').setLevel(logging.INFO)
+
+    # Default to logging to stderr.
+    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s ')
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(stream_handler)
+    logging.getLogger('pylink').addHandler(stream_handler)
+
     return logger
 
 LOGGER = silent_logger()
