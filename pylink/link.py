@@ -16,6 +16,16 @@ import time
 import serial
 import binascii
 
+# Type compatibilite between python3 and python2
+if sys.version_info[0] >= 3:
+    # Python 3
+    text_type = str
+    byte_type = bytes
+else:
+    # Python 2
+    text_type = unicode
+    byte_type = str
+
 from .logger import LOGGER
 
 
@@ -31,19 +41,28 @@ class Link(object):
         '''Close the link.'''
         pass
 
-    def byte_to_string(self, byte):
+    def byte_to_hex(self, bytes):
         '''Convert a byte string to it's hex string representation.'''
-        hexstr = binascii.hexlify(byte)
+        if sys.version_info[0] >= 3:
+            hexstr = str(binascii.hexlify(bytes), "utf-8")
+        else:
+            hexstr = str(binascii.hexlify(bytes))
         data = []
         for i in range(0, len(hexstr), 2):
-            data.append(str(hexstr[i:i + 2].upper()))
-        return " ".join(data)
+            data.append("%s" % hexstr[i:i + 2].upper())
+        return ' '.join(data)
 
-    def log(self, message, data, is_byte=False):
-        if is_byte:
-            LOGGER.info("%s : <%s>" % (message, self.byte_to_string(data)))
+    def log(self, message, data):
+        if self.is_bytes(data):
+            LOGGER.info("%s : <%s>" % (message, self.byte_to_hex(data)))
         else:
             LOGGER.info("%s : <%s>" % (message, repr(data)))
+
+    def is_text(self, data):
+        return isinstance(data, text_type)
+
+    def is_bytes(self, data):
+        return isinstance(data, byte_type)
 
     def __del__(self):
         '''Close link when object is deleted.'''
@@ -105,27 +124,25 @@ class TCPLink(Link):
         self.open()
         return self._socket
 
-    def write(self, data, is_byte=False):
+    def write(self, data):
         '''Write all `data` to socket.'''
-        if not isinstance(data, bytes):
-            if sys.version_info[0] >= 3:
-                data = bytes("%s" % data, encoding='utf-8')
-            else:
-                data = bytes(unicode("%s" % data).encode('utf-8'))
-        self.send_to_socket(data)
-        self.log("Write", data, is_byte)
+        if self.is_text(data):
+            self.send_to_socket(byte_type(data.encode('utf-8')))
+        else:
+            self.send_to_socket(data)
+        self.log("Write", data)
 
-    def read(self, size=None, timeout=None, is_byte=False):
+    def read(self, size=None, timeout=None):
         '''Read data from socket. The maximum amount of data to be received at
         once is specified by `size`. If `is_byte` is True, the data will be
         convert to hexadecimal array.'''
         size = size or self.MAX_STRING_SIZE
-        timeout = timeout or self.timeout or 1
-        data = self.recv_timeout(size, timeout, is_byte)
-        self.log("Read", data, is_byte)
+        timeout = (timeout or 1) * (self.timeout or 1)
+        data = self.recv_timeout(size, timeout)
+        self.log("Read", data)
         return data
 
-    def recv_timeout(self, size, timeout, is_byte=False):
+    def recv_timeout(self, size, timeout):
         '''Uses a non-blocking sockets in order to continue trying to get data
         as long as the client manages to even send a single byte.
         This is useful for moving data which you know very little about
@@ -136,7 +153,6 @@ class TCPLink(Link):
         begin = time.time()
         data = bytearray()
         total_data = []
-
         while True:
             #if you got some data, then break after wait sec
             if total_data and time.time() - begin > timeout:
@@ -159,19 +175,11 @@ class TCPLink(Link):
                 # still alive
                 time.sleep(0.1)
                 pass
-        if not is_byte:
-            # Try to convert into str
-            try:
-                if sys.version_info[0] >= 3:
-                    # Python 3
-                    return str(b"".join(total_data), encoding='utf8')
-                else:
-                    # Python 2
-                    return unicode(b"".join(total_data), encoding='utf8')
-            except:
-                pass
-        #else, return bytes
-        return b"".join(total_data)
+        # Try to convert into str
+        try:
+            return text_type("".join(total_data), encoding='utf8')
+        except:
+            return b"".join(total_data)
 
     def send_to_socket(self, data):
         '''Send data to TCP socket.'''
