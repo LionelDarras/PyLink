@@ -84,16 +84,17 @@ class TCPLink(Link):
         if self._socket is None:
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._socket.connect(self.address)
-            self._socket.settimeout(self.timeout)
+            self.socket.setblocking(0)
             LOGGER.info('new %s was initialized' % self)
 
     def settimeout(self, timeout):
         self.timeout = timeout
-        self.socket.settimeout(self.timeout)
 
     def close(self):
         '''Close the socket.'''
         if self._socket is not None:
+            LOGGER.info('Close connection %s' % self)
+            self.empty_socket()
             self._socket.close()
             LOGGER.info('Connection %s was closed' % self)
             self._socket = None
@@ -114,30 +115,34 @@ class TCPLink(Link):
         self.send_to_socket(data)
         self.log("Write", data, is_byte)
 
-    def read(self, size=None, is_byte=False):
+    def read(self, size=None, timeout=None, is_byte=False):
         '''Read data from socket. The maximum amount of data to be received at
         once is specified by `size`. If `is_byte` is True, the data will be
         convert to hexadecimal array.'''
         size = size or self.MAX_STRING_SIZE
-        data = self.recv_timeout(size, is_byte)
+        timeout = timeout or self.timeout or 1
+        data = self.recv_timeout(size, timeout, is_byte)
         self.log("Read", data, is_byte)
         return data
 
-    def recv_timeout(self, size, is_byte=False):
+    def recv_timeout(self, size, timeout, is_byte=False):
         '''Uses a non-blocking sockets in order to continue trying to get data
         as long as the client manages to even send a single byte.
         This is useful for moving data which you know very little about
-        (like encrypted data), so cannot check for completion in a sane way.'''
+        (like encrypted data), so cannot check for completion in a sane way.
 
-        self.socket.setblocking(0)
-        timeout = self.timeout or 1
+        http://code.activestate.com/recipes/408859-socketrecv-three-ways-to-turn-it-into-recvall/
+        '''
         begin = time.time()
         data = bytearray()
         total_data = []
 
         while True:
             #if you got some data, then break after wait sec
-            if time.time() - begin > timeout:
+            if total_data and time.time() - begin > timeout:
+                break
+            #if you got no data at all, wait a little longer
+            elif time.time() - begin > timeout * 2:
                 break
             try:
                 data = self.recv_from_socket(size)
@@ -154,7 +159,6 @@ class TCPLink(Link):
                 # still alive
                 time.sleep(0.1)
                 pass
-        self.socket.settimeout(self.timeout)
         if not is_byte:
             # Try to convert into str
             try:
@@ -177,6 +181,11 @@ class TCPLink(Link):
         '''Read data from TCP socket.'''
         return self.socket.recv(size)
 
+    def empty_socket(self):
+        '''Read data from TCP socket.'''
+        # empty buffer reception
+        self.recv_timeout(self.MAX_STRING_SIZE, timeout=0.1)
+
 
 class UDPLink(TCPLink):
     '''TCPLink class allows UDP/IP protocol communication with File-like
@@ -191,7 +200,6 @@ class UDPLink(TCPLink):
         '''Open the socket.'''
         if self._socket is None:
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self._socket.settimeout(self.timeout)
             LOGGER.info('new %s was initialized' % self)
 
     def send_to_socket(self, data):
