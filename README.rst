@@ -30,7 +30,7 @@ Examples
   >>> from pylink import TCPLink, link_from_url
   >>> link = TCPLink('localhost', 7) # conntect to echo tcp service
   >>> link.write('Hello')
-  2012-06-05 12:44:06,211 INFO: new <TCPLink udp:127.0.0.1:7> was initialized
+  2012-06-05 12:44:06,211 INFO: new <TCPLink tcp:127.0.0.1:7> was initialized
   2012-06-05 12:44:06,211 INFO: Write : <b'hello'>
   >>> link.read() == 'Hello'
   2012-06-05 12:44:06,312 INFO: Read : <'hello'>
