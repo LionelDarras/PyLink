@@ -23,10 +23,13 @@ def link_from_url(url):
     try:
         if len(args) > 1:
             mode = args[0].lower()
-            if mode == "tcp":
+            if mode == "tcp" or mode == "udp":
                 host = args[1]
                 port = int(args[2])
-                link = TCPLink(host, port)
+                if mode == "tcp":
+                    link = TCPLink(host, port)
+                else:
+                    link = UDPLink(host, port)
             elif mode == "serial":
                 if len(args) == 2:
                     port = args[1]
