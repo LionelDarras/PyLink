@@ -6,26 +6,16 @@
     Logging setup.
 
     :copyright: Copyright 2012 Salem Harrache and contributors, see AUTHORS.
-    :license: BSD.
+    :license: BSD, see LICENSE for details.
 
 """
-
 from __future__ import unicode_literals
-
 import logging
+from .compat import NullHandler
 
 
-def silent_logger():
-    '''Initialize a silent logger.'''
-    logger = logging.getLogger('pylink')
-    try:
-        from logging import NullHandler
-    except ImportError:
-        class NullHandler(logging.Handler):
-            def emit(self, record):
-                pass
-    logger.addHandler(NullHandler())
-    return logger
+LOGGER = logging.getLogger('pyvpdriver')
+LOGGER.addHandler(NullHandler())
 
 
 def active_logger():
@@ -42,5 +32,3 @@ def active_logger():
     logger.addHandler(stream_handler)
 
     return logger
-
-LOGGER = silent_logger()

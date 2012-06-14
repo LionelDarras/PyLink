@@ -6,10 +6,10 @@
     The public API to pylink.
 
     :copyright: Copyright 2012 Salem Harrache and contributors, see AUTHORS.
-    :license: BSD.
+    :license: BSD, see LICENSE for details.
 
 '''
-VERSION = '0.1'
+VERSION = '0.2'
 __version__ = VERSION
 
 from .link import TCPLink, SerialLink, UDPLink
@@ -23,10 +23,13 @@ def link_from_url(url):
     try:
         if len(args) > 1:
             mode = args[0].lower()
-            if mode == "tcp":
+            if mode == "tcp" or mode == "udp":
                 host = args[1]
                 port = int(args[2])
-                link = TCPLink(host, port)
+                if mode == "tcp":
+                    link = TCPLink(host, port)
+                else:
+                    link = UDPLink(host, port)
             elif mode == "serial":
                 if len(args) == 2:
                     port = args[1]

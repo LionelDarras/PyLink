@@ -9,16 +9,16 @@
     :license: BSD.
 
 '''
-
 from __future__ import unicode_literals
 import pytest
 from contextlib import contextmanager
 
 from .link import TCPLink, UDPLink
 from . import link_from_url
-from .logger import LOGGER, active_logger
+from .logger import active_logger
 
-LOGGER = active_logger()
+
+active_logger()
 
 
 @contextmanager
@@ -51,7 +51,7 @@ class TestUDPLink(object):
         self.echo_link.write(b'\x06\xFF')
         assert self.echo_link.read(2) == b'\x06\xFF'
         self.echo_link.write(b'\x06\xFF')
-        assert self.echo_link.read(2, is_byte=True) == b'\x06\xFF'
+        assert self.echo_link.read(2) == b'\x06\xFF'
 
 
 class TestTCPLink(object):
@@ -72,7 +72,7 @@ class TestTCPLink(object):
         self.echo_link.write(b'\x06\xFF')
         assert self.echo_link.read(2) == b'\x06\xFF'
         self.echo_link.write(b'\x06\xFF')
-        assert self.echo_link.read(2, is_byte=True) == b'\x06\xFF'
+        assert self.echo_link.read(2) == b'\x06\xFF'
 
     def test_web_connection(self):
         '''Test internet connection.'''

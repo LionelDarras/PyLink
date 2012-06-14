@@ -4,29 +4,17 @@
     -----------
 
     :copyright: Copyright 2012 Salem Harrache and contributors, see AUTHORS.
-    :license: BSD.
+    :license: BSD, see LICENSE for details.
 
 '''
-
 from __future__ import unicode_literals
-
-import sys
 import socket
 import time
 import serial
 import binascii
 
-# Type compatibilite between python3 and python2
-if sys.version_info[0] >= 3:
-    # Python 3
-    text_type = str
-    byte_type = bytes
-else:
-    # Python 2
-    text_type = unicode
-    byte_type = str
-
 from .logger import LOGGER
+from .compat import bytes, str
 
 
 class Link(object):
@@ -43,10 +31,7 @@ class Link(object):
 
     def byte_to_hex(self, bytes):
         '''Convert a byte string to it's hex string representation.'''
-        if sys.version_info[0] >= 3:
-            hexstr = str(binascii.hexlify(bytes), "utf-8")
-        else:
-            hexstr = str(binascii.hexlify(bytes))
+        hexstr = str(binascii.hexlify(bytes), "utf-8")
         data = []
         for i in range(0, len(hexstr), 2):
             data.append("%s" % hexstr[i:i + 2].upper())
@@ -59,10 +44,10 @@ class Link(object):
             LOGGER.info("%s : <%s>" % (message, repr(data)))
 
     def is_text(self, data):
-        return isinstance(data, text_type)
+        return isinstance(data, str)
 
     def is_bytes(self, data):
-        return isinstance(data, byte_type)
+        return isinstance(data, bytes)
 
     def __del__(self):
         '''Close link when object is deleted.'''
@@ -127,7 +112,7 @@ class TCPLink(Link):
     def write(self, data):
         '''Write all `data` to socket.'''
         if self.is_text(data):
-            self.send_to_socket(byte_type(data.encode('utf-8')))
+            self.send_to_socket(bytes(data.encode('utf-8')))
         else:
             self.send_to_socket(data)
         self.log("Write", data)
@@ -147,8 +132,6 @@ class TCPLink(Link):
         as long as the client manages to even send a single byte.
         This is useful for moving data which you know very little about
         (like encrypted data), so cannot check for completion in a sane way.
-
-        http://code.activestate.com/recipes/408859-socketrecv-three-ways-to-turn-it-into-recvall/
         '''
         begin = time.time()
         data = bytearray()
@@ -177,7 +160,7 @@ class TCPLink(Link):
                 pass
         # Try to convert into str
         try:
-            return text_type("".join(total_data), encoding='utf8')
+            return str(b"".join(total_data), encoding='utf8')
         except:
             return b"".join(total_data)
 
@@ -271,16 +254,19 @@ class SerialLink(Link):
         self.open()
         return self._serial
 
-    def write(self, data, is_byte=False):
+    def write(self, data):
         '''Write all `data` to the serial connection.'''
         self.serial.write(data)
-        self.log("Write", data, is_byte)
+        self.log("Write", data)
 
-    def read(self, size=None, is_byte=False):
+    def read(self, size=None, timeout=None):
         '''Read data from the serial connection. The maximum amount of data
         to be received at once is specified by `size`. If `is_byte` is True,
         the data will be convert to byte array.'''
         size = size or self.MAX_STRING_SIZE
+        timeout = (timeout or 1) * (self.timeout or 1)
+        self.serial.timeout = timeout
         data = self.serial.read(size)
-        self.log("Read", data, is_byte)
+        self.log("Read", data)
+        self.serial.timeout = self.timeout
         return data
