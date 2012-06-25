@@ -141,7 +141,7 @@ class TCPLink(Link):
             if total_data and time.time() - begin > timeout:
                 break
             #if you got no data at all, wait a little longer
-            elif time.time() - begin > timeout * 2:
+            elif time.time() - begin > (timeout * 2):
                 break
             try:
                 data = self.recv_from_socket(size)
@@ -154,9 +154,6 @@ class TCPLink(Link):
                 else:
                     time.sleep(0.1)
             except:
-                # just need to get out of recv form time to time to check if
-                # still alive
-                time.sleep(0.1)
                 pass
         # Try to convert into str
         try:
