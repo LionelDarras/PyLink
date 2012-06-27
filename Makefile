@@ -6,6 +6,13 @@ PYFLAKES_WHITELIST=$(shell find . -name "*.py" ! -path "./docs/*" \
                     ! -path "./.tox/*" ! -path "./pylink/__init__.py" \
                     ! -path "./pylink/compat.py")
 
+env:
+	rm ./env -fr
+	virtualenv ./env
+	/bin/bash -c 'source ./env/bin/activate ; pip install pep8 ; \
+        pip install pyflakes ; \
+        pip install tox ; pip install -e . '
+
 test:
 	tox
 
@@ -13,7 +20,7 @@ pyflakes:
 	pyflakes ${PYFLAKES_WHITELIST}
 
 pep:
-	pep8 --first pylink
+	pep8 --first pyvantagepro
 
 clean:
 	git clean -Xfd

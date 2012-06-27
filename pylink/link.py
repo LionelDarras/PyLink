@@ -38,7 +38,7 @@ class Link(object):
         return ' '.join(data)
 
     def log(self, message, data):
-        if self.is_bytes(data):
+        if not self.is_text(data):
             LOGGER.info("%s : <%s>" % (message, self.byte_to_hex(data)))
         else:
             LOGGER.info("%s : <%s>" % (message, repr(data)))
@@ -254,7 +254,10 @@ class SerialLink(Link):
     def write(self, data):
         '''Write all `data` to the serial connection.'''
         self.serial.write(data)
-        self.log("Write", data)
+        try:
+            self.log("Write", str(data, encoding='utf8'))
+        except:
+            self.log("Write", data)
 
     def read(self, size=None, timeout=None):
         '''Read data from the serial connection. The maximum amount of data
@@ -264,6 +267,83 @@ class SerialLink(Link):
         timeout = (timeout or 1) * (self.timeout or 1)
         self.serial.timeout = timeout
         data = self.serial.read(size)
+        try:
+            data = str(data, encoding='utf8')
+        except:
+            pass
         self.log("Read", data)
         self.serial.timeout = self.timeout
         return data
+
+class GSMLink(SerialLink):
+    '''GSM link class.'''
+
+    STATUS ={'0':'ready', '1':'unavailable', '2':'unknown', '3':'ringing',
+             '4':'call in progress', '5':'asleep'}
+
+
+    def __init__(self, phone, port, baudrate=38400, bytesize=8,
+                 parity='N', stopbits=1, timeout=1):
+        super(GSMLink, self).__init__(port, baudrate, bytesize,
+                                         parity, stopbits, timeout)
+        self.phone = phone
+        self.is_open = False
+
+    @property
+    def serial(self):
+        '''Return an opened serial object.'''
+        if self._serial is None:
+            self._serial = serial.Serial(self.port, self.baudrate,
+                                    timeout=self.timeout,
+                                    bytesize=self.bytesize, parity=self.parity,
+                                    stopbits=self.stopbits)
+            LOGGER.info('new %s was initialized' % self)
+        return self._serial
+
+    def call(self):
+        if not self.status() == "ready":
+            self.hangup()
+
+        self.log("GSM", "Call %s" % self.phone)
+        self.write("ATD%s\r" % self.phone)
+        while range(100):
+            response = self.serial.read(22)
+            if "BUSY" in response:
+                self.log("GSM", "Client is busy")
+                return False
+            if "CONNECT 9600" in response:
+                self.log("GSM", "Client is ready")
+                return True
+            else:
+                time.sleep(1)
+            self.log("GSM", "%s - %s" % (self.status() , response))
+        return False
+
+    def hangup(self):
+        self.write("ATH\r")
+        self.read(len('\r\nOK\r\n'))
+
+    def status(self):
+        self.serial.write('AT+CPAS\r\n')
+        result = self.serial.read(self.MAX_STRING_SIZE)
+        try:
+            result = result.rstrip('\r\nOK\r\n').rstrip('\r\n')[-1]
+            return self.STATUS[result]
+        except:
+            return 'unknown'
+
+    def open(self):
+        '''Open the gsm connection.'''
+        if not self.is_open:
+            self.is_open = self.call()
+            if not self.is_open:
+                raise ValueError('no GSM device')
+
+    def close(self):
+        '''Open the gsm connection.'''
+        if self._serial is not None:
+            if self._serial.isOpen():
+                self.hangup()
+                self._serial.close()
+                LOGGER.info('Connection %s was closed' % self)
+            self._serial = None

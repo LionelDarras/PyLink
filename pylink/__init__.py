@@ -12,8 +12,8 @@
 VERSION = '0.2'
 __version__ = VERSION
 
-from .link import TCPLink, SerialLink, UDPLink
-from .logger import LOGGER
+from .link import TCPLink, SerialLink, UDPLink, GSMLink
+from .logger import LOGGER, active_logger
 
 
 def link_from_url(url):
