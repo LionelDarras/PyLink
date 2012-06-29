@@ -25,13 +25,13 @@ except:
 
 setup(
     name='PyLink',
-    version='0.2',
+    version='0.3',
     url='https://github.com/SalemHarrache/PyLink',
     license='BSD',
     description='Universal communication interface using File-Like API',
     long_description=README + '\n\n' + CHANGES,
     author='Salem Harrache',
-    author_email='salem.harrache@gmail.com',
+    author_email='salem@harrache.info',
     maintainer='Lionel Darras',
     maintainer_email='Lionel.Darras@obs.ujf-grenoble.fr',
     classifiers=[

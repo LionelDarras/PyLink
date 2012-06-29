@@ -208,7 +208,7 @@ class SerialLink(Link):
       - Device name: depending on operating system.
           e.g. /dev/ttyUSB0 on GNU/Linux or COM3 on Windows.'''
     def __init__(self, port, baudrate=19200, bytesize=8, parity='N',
-                                             stopbits=1, timeout=1):
+                 stopbits=1, timeout=1):
         self.port = port
         self.timeout = timeout
         self.baudrate = baudrate
@@ -221,16 +221,17 @@ class SerialLink(Link):
     def url(self):
         '''Make a connection url.'''
         return 'serial:%s:%d:%d%s%d' % (self.port, self.baudrate,
-                                          self.bytesize, self.parity,
-                                          self.stopbits)
+                                        self.bytesize, self.parity,
+                                        self.stopbits)
 
     def open(self):
         '''Open the serial connection.'''
         if self._serial is None:
             self._serial = serial.Serial(self.port, self.baudrate,
-                                    timeout=self.timeout,
-                                    bytesize=self.bytesize, parity=self.parity,
-                                    stopbits=self.stopbits)
+                                         timeout=self.timeout,
+                                         bytesize=self.bytesize,
+                                         parity=self.parity,
+                                         stopbits=self.stopbits)
             LOGGER.info('new %s was initialized' % self)
 
     def settimeout(self, timeout):
@@ -275,6 +276,7 @@ class SerialLink(Link):
         self.serial.timeout = self.timeout
         return data
 
+
 class GSMLink(Link):
     '''GSM link class.'''
 
@@ -287,9 +289,9 @@ class GSMLink(Link):
         LOGGER.info("GSM : Call %s" % self.phone)
         self.link.write("ATD%s\r\n" % self.phone)
         while range(100):
-            response = self.link.read(self.MAX_STRING_SIZE)
-            if "BUSY" in response or "NO CARRIER" in response \
-                or "ERROR" in response:
+            response = self.link.read(22)
+            if ("BUSY" in response or "NO CARRIER" in response
+                    or "ERROR" in response):
                 LOGGER.error("GSM : <%s>" % repr(response))
                 return False
             if "CONNECT" in response:
@@ -303,9 +305,9 @@ class GSMLink(Link):
     def _hangup(self):
         if self.is_open:
             self.link.write("+++")
-            self.link.read()
+            self.link.read(6)
             self.link.write("ATH\r\n")
-            if "OK" not in self.link.read():
+            if "OK" not in self.link.read(6):
                 return self._hangup()
             LOGGER.info("GSM : Hang-up")
 

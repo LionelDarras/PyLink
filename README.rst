@@ -2,8 +2,8 @@ PyLink
 ======
 
 Pylink offers a universal communication interface using File-Like API.
-For now, only the **TCP**, **UDP** and **Serial** interfaces are supported.
-The **USB** and **GSM** interfaces will be added soon.
+For now, only the **TCP**, **UDP**, **Serial** and GSM interfaces are 
+supported.
 
 The aim of this project is to allow any type of communication.
 It is best suited for projects that have various ways of communicating
@@ -36,8 +36,30 @@ Examples
   2012-06-05 12:44:06,312 INFO: Read : <'hello'>
   True
 
-::
+With GSMLink, you shoud specify the modem connection link::
 
-  >>> link = link_from_url("serial:/dev/ttyUSB0:115200")
-  >>> print link
-  <SerialLink serial:/dev/ttyUSB0:115200:8N1>
+
+  >>> from pylink import GSMLink, SerialLink
+  >>> link = GSMLink("0678986955", SerialLink("/dev/ttyUSB0", 38400))
+  >>> link.open()
+  2012-06-29 15:13:31,637 INFO: new <SerialLink serial:/dev/ttyUSB0:38400:8N1> was initialized 
+  2012-06-29 15:13:31,637 INFO: GSM : Call 0678986955 
+  2012-06-29 15:13:31,638 INFO: Write : <u'ATD0678986955\r\n'> 
+  2012-06-29 15:13:31,648 INFO: GSM : <u'call in progress'> 
+  2012-06-29 15:13:41,649 INFO: GSM : <u'call in progress'> 
+  2012-06-29 15:14:08,075 INFO: Read : <u'\r\nCONNECT 9600\r\n\n\r\n\r\n\r'> 
+  2012-06-29 15:14:08,076 INFO: GSM : <u'Client is ready (\r\nCONNECT 9600\r\n\n\r\n\r\n\r)'> 
+  >>> link.write("TEST\n")
+  2012-06-29 15:14:16,193 INFO: Write : <u'TEST\n'> 
+  >>> link.read()
+  2012-06-29 15:14:24,972 INFO: Read : <u'\n\rTEST\n\r'>
+  
+  TEST
+  
+  >>> link.close()
+  2012-06-29 15:29:09,295 INFO: Write : <u'+++'> 
+  2012-06-29 15:29:10,318 INFO: Read : <u'\r\nOK\r\n'> 
+  2012-06-29 15:29:10,318 INFO: Write : <u'ATH\r\n'> 
+  2012-06-29 15:29:10,336 INFO: Read : <u'\r\nOK\r\n'> 
+  2012-06-29 15:29:10,337 INFO: GSM : Hang-up 
+  2012-06-29 15:29:10,437 INFO: Connection <SerialLink serial:/dev/ttyUSB0:38400:8N1> was closed

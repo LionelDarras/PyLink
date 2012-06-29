@@ -49,7 +49,7 @@ def link_from_url(url):
                     parity = link_args[3][2]
                     stopbits = int(link_args[3][3])
                     link = SerialLink(port, baudrate, bytesize, parity,
-                                            stopbits, timeout)
+                                      stopbits, timeout)
     except:
         pass
     if link is None:

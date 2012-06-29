@@ -4,7 +4,7 @@ SHELL := /bin/bash
 # exclude ./env/, which may contain virtualenv packages
 PYFLAKES_WHITELIST=$(shell find . -name "*.py" ! -path "./docs/*" \
                     ! -path "./.tox/*" ! -path "./pylink/__init__.py" \
-                    ! -path "./pylink/compat.py")
+                    ! -path "./env/*" ! -path "./pylink/compat.py")
 
 env:
 	rm ./env -fr
@@ -20,7 +20,7 @@ pyflakes:
 	pyflakes ${PYFLAKES_WHITELIST}
 
 pep:
-	pep8 --first pyvantagepro
+	pep8 --first pylink
 
 clean:
 	git clean -Xfd
