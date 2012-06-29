@@ -1,5 +1,7 @@
 include Makefile
+include AUTHORS
 include CHANGES.rst
+include README.rst
 include LICENSE
 include pytest.ini
 include tox.ini
