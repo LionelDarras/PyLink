@@ -275,75 +275,67 @@ class SerialLink(Link):
         self.serial.timeout = self.timeout
         return data
 
-class GSMLink(SerialLink):
+class GSMLink(Link):
     '''GSM link class.'''
 
-    STATUS ={'0':'ready', '1':'unavailable', '2':'unknown', '3':'ringing',
-             '4':'call in progress', '5':'asleep'}
-
-
-    def __init__(self, phone, port, baudrate=38400, bytesize=8,
-                 parity='N', stopbits=1, timeout=1):
-        super(GSMLink, self).__init__(port, baudrate, bytesize,
-                                         parity, stopbits, timeout)
+    def __init__(self, phone, link):
+        self.link = link
         self.phone = phone
         self.is_open = False
 
-    @property
-    def serial(self):
-        '''Return an opened serial object.'''
-        if self._serial is None:
-            self._serial = serial.Serial(self.port, self.baudrate,
-                                    timeout=self.timeout,
-                                    bytesize=self.bytesize, parity=self.parity,
-                                    stopbits=self.stopbits)
-            LOGGER.info('new %s was initialized' % self)
-        return self._serial
-
-    def call(self):
-        if not self.status() == "ready":
-            self.hangup()
-
-        self.log("GSM", "Call %s" % self.phone)
-        self.write("ATD%s\r" % self.phone)
+    def _call(self):
+        LOGGER.info("GSM : Call %s" % self.phone)
+        self.link.write("ATD%s\r\n" % self.phone)
         while range(100):
-            response = self.serial.read(22)
-            if "BUSY" in response:
-                self.log("GSM", "Client is busy")
+            response = self.link.read(self.MAX_STRING_SIZE)
+            if "BUSY" in response or "NO CARRIER" in response \
+                or "ERROR" in response:
+                LOGGER.error("GSM : <%s>" % repr(response))
                 return False
-            if "CONNECT 9600" in response:
-                self.log("GSM", "Client is ready")
+            if "CONNECT" in response:
+                self.log("GSM", "Client is ready (%s)" % response)
+                self.link.read()
                 return True
-            else:
-                time.sleep(1)
-            self.log("GSM", "%s - %s" % (self.status() , response))
+            self.log("GSM", "call in progress")
+            time.sleep(1)
         return False
 
-    def hangup(self):
-        self.write("ATH\r")
-        self.read(len('\r\nOK\r\n'))
-
-    def status(self):
-        self.serial.write('AT+CPAS\r\n')
-        result = self.serial.read(self.MAX_STRING_SIZE)
-        try:
-            result = result.rstrip('\r\nOK\r\n').rstrip('\r\n')[-1]
-            return self.STATUS[result]
-        except:
-            return 'unknown'
+    def _hangup(self):
+        if self.is_open:
+            self.link.write("+++")
+            self.link.read()
+            self.link.write("ATH\r\n")
+            if "OK" not in self.link.read():
+                return self._hangup()
+            LOGGER.info("GSM : Hang-up")
 
     def open(self):
         '''Open the gsm connection.'''
         if not self.is_open:
-            self.is_open = self.call()
+            self.link.open()
+            self.is_open = self._call()
             if not self.is_open:
                 raise ValueError('no GSM device')
 
     def close(self):
-        '''Open the gsm connection.'''
-        if self._serial is not None:
-            if self._serial.isOpen():
-                self.hangup()
-                self._serial.close()
-                LOGGER.info('Connection %s was closed' % self)
-            self._serial = None
+        '''Close the gsm connection.'''
+        if self.is_open:
+            self._hangup()
+            self.link.close()
+            self.is_open = False
+
+    @property
+    def url(self):
+        '''Connection url.'''
+        return 'gsm:%s:%s' % (self.phone, str(self.link))
+
+    def settimeout(self, timeout):
+        self.link.settimeout(timeout)
+
+    def write(self, data):
+        '''Write all `data` to the gsm connection.'''
+        self.link.write(data)
+
+    def read(self, size=None, timeout=None):
+        '''Read data from the serial connection.'''
+        return self.link.read(size, timeout)
