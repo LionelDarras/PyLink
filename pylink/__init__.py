@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for details.
 
 '''
-VERSION = '0.2'
+VERSION = '0.3'
 __version__ = VERSION
 
 from .link import TCPLink, SerialLink, UDPLink, GSMLink
@@ -23,6 +23,10 @@ def link_from_url(url):
     try:
         if len(args) > 1:
             mode = args[0].lower()
+            if mode == "gsm":
+                phone = args[1]
+                parent_link = link_from_url(':'.join(args[2:]))
+                link = GSMLink(phone, parent_link)
             if mode == "tcp" or mode == "udp":
                 host = args[1]
                 port = int(args[2])
