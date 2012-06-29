@@ -63,3 +63,17 @@ With GSMLink, you shoud specify the modem connection link::
   2012-06-29 15:29:10,336 INFO: Read : <u'\r\nOK\r\n'> 
   2012-06-29 15:29:10,337 INFO: GSM : Hang-up 
   2012-06-29 15:29:10,437 INFO: Connection <SerialLink serial:/dev/ttyUSB0:38400:8N1> was closed
+
+Contribute
+----------
+
+There are several ways to contribute to the project:
+
+#. Post bugs and feature `requests on github`_.
+#. Fork `the repository`_ on Github to start making your changes.
+#. Write a test which shows that the bug was fixed or that the feature works as expected.
+#. Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS_.
+
+.. _`requests on github`: https://github.com/SalemHarrache/PyLink/issues
+.. _`the repository`: https://github.com/SalemHarrache/PyLink
+.. _AUTHORS: https://github.com/SalemHarrache/PyLink/blob/master/AUTHORS.rst
