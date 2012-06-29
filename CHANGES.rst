@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+Version 0.3
+~~~~~~~~~~~
+
+Released on 2012-06-29.
+
+- Support for GSMLink with AT commands. GSMLink can use TCP, UDP or Serial link.
+
 Version 0.2
 ~~~~~~~~~~~
 
