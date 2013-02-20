@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for details.
 
 '''
-VERSION = '0.3'
+VERSION = '0.3.1'
 __version__ = VERSION
 
 from .link import TCPLink, SerialLink, UDPLink, GSMLink
@@ -19,6 +19,7 @@ from .logger import LOGGER, active_logger
 def link_from_url(url):
     '''Get link from url'''
     link = None
+    bad_url = False
     args = url.split(':')
     try:
         if len(args) > 1:
@@ -42,16 +43,16 @@ def link_from_url(url):
                     port = args[1]
                     baudrate = int(args[2])
                     link = SerialLink(port, baudrate)
-                elif len(link_args) == 4:
-                    port = link_args[1]
-                    baudrate = int(link_args[2])
-                    bytesize = int(link_args[3][1])
-                    parity = link_args[3][2]
-                    stopbits = int(link_args[3][3])
+                elif len(args) == 4:
+                    port = args[1]
+                    baudrate = int(args[2])
+                    bytesize = int(args[3][0])
+                    parity = args[3][1]
+                    stopbits = int(args[3][2])
                     link = SerialLink(port, baudrate, bytesize, parity,
-                                      stopbits, timeout)
-    except:
-        pass
-    if link is None:
+                                      stopbits)
+    except IndexError:
+        bad_url = True
+    if link is None or bad_url:
         raise ValueError('Bad url link sepecified')
     return link
