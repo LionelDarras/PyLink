@@ -14,7 +14,7 @@ import serial
 import binascii
 
 from .logger import LOGGER
-from .compat import bytes, str
+from .compat import bytes, str, format_string
 
 
 class Link(object):
@@ -254,6 +254,7 @@ class SerialLink(Link):
 
     def write(self, data):
         '''Write all `data` to the serial connection.'''
+        data = format_string(data)
         self.serial.write(data)
         try:
             self.log("Write", str(data, encoding='utf8'))

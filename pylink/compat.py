@@ -70,3 +70,19 @@ elif is_py3:
 
     str = str
     bytes = bytes
+
+
+def format_unicode(s, encoding='utf-8'):
+    if isinstance(s, str):
+        return s
+    elif isinstance(s, basestring):
+        return s.decode(encoding)
+    return str(s)
+
+
+def format_string(s, encoding='utf-8'):
+    if isinstance(s, str):
+        return s.encode(encoding)
+    if isinstance(s, basestring):
+        return s
+    return str(s)

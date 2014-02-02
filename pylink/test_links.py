@@ -90,7 +90,7 @@ def test_link_from_url():
     assert link.read(5) == "hello"
     with assert_raises(ValueError, 'Bad url link sepecified'):
         assert link_from_url('')
-    with assert_raises(ValueError, 'Bad url link sepecified'):
+    with assert_raises(ValueError, 'invalid literal for int'):
         assert link_from_url('tcp:localhost:10.3')
     with assert_raises(ValueError, 'Bad url link sepecified'):
         assert link_from_url('unknow:/dev/ttyUSB0')
