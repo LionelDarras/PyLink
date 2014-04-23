@@ -281,15 +281,16 @@ class SerialLink(Link):
 class GSMLink(Link):
     '''GSM link class.'''
 
-    def __init__(self, phone, link):
+    def __init__(self, phone, link,timeout=1):      #EGC added timeout (the aplication throws an error if the object doesn't have an attribute when call packbus read method)
         self.link = link
         self.phone = phone
         self.is_open = False
+        self.timeout = timeout  #EGC set timeout
 
     def _call(self):
         LOGGER.info("GSM : Call %s" % self.phone)
         self.link.write("ATD%s\r\n" % self.phone)
-        while range(100):
+        for i in range(100):	#EGC Change While to For (While never ends, in case of error program won't stop, infinite loop)
             response = self.link.read(22)
             if ("BUSY" in response or "NO CARRIER" in response
                     or "ERROR" in response):
@@ -303,37 +304,41 @@ class GSMLink(Link):
             time.sleep(1)
         return False
 
-    def _hangup(self):
-        if self.is_open:
-            self.link.write("+++")
-            self.link.read(6)
-            self.link.write("ATH\r\n")
-            if "OK" not in self.link.read(6):
-                return self._hangup()
-            LOGGER.info("GSM : Hang-up")
-
+    def _hangup(self):      
+        #EGC my modem (Citerion (formerly SIEMENS) gprs mc35i) send two additional weird characters before the OK response, something that looks like ᤙᤙOK and it makes the function never ends
+        #So I have had to delete the response checking and also the is_open checking because sometimes the modem wasn't able to hang up despite aparently the conexion was closed is_open=false 
+        self.link.write("+++")
+        self.link.read(6)
+        self.link.write("ATH\r\n")
+        resp=self.link.read(6)
+        LOGGER.info("GSM : Hang-up")
+        
     def open(self):
         '''Open the gsm connection.'''
         if not self.is_open:
             self.link.open()
             self.is_open = self._call()
             if not self.is_open:
+                self.link.close()   #EGC Close Serial port because sometimes if a error occurrs let the serial port open and busy and it makes impossible  restart a new comunication.
                 raise ValueError('no GSM device')
-
+            
     def close(self):
         '''Close the gsm connection.'''
         if self.is_open:
             self._hangup()
             self.link.close()
             self.is_open = False
-
+        else:   
+            self.link.close()   #EGC to ensure te correct close of the serial port to avoid futures problems when someone wants to restart a serial com
+            
     @property
     def url(self):
         '''Connection url.'''
         return 'gsm:%s:%s' % (self.phone, str(self.link))
 
     def settimeout(self, timeout):
-        self.link.settimeout(timeout)
+        self.timeout=timeout #EGC Set GSM timeout
+        self.link.settimeout(timeout)    #EGC Also Set the serial port timeout
 
     def write(self, data):
         '''Write all `data` to the gsm connection.'''
