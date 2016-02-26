@@ -25,7 +25,7 @@ except:
 
 setup(
     name='PyLink',
-    version='0.3.2',
+    version='0.3.3',
     url='https://github.com/SalemHarrache/PyLink',
     license='BSD',
     description='Universal communication interface using File-Like API',
@@ -33,7 +33,7 @@ setup(
     author='Salem Harrache',
     author_email='salem@harrache.info',
     maintainer='Lionel Darras',
-    maintainer_email='Lionel.Darras@obs.ujf-grenoble.fr',
+    maintainer_email='lionel.darras@mom.fr',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

@@ -124,7 +124,8 @@ class TCPLink(Link):
         size = size or self.MAX_STRING_SIZE
         timeout = (timeout or 1) * (self.timeout or 1)
         data = self.recv_timeout(size, timeout)
-        self.log("Read", data)
+        if len(data) != 0 :
+            self.log("Read", data)
         return data
 
     def recv_timeout(self, size, timeout):
@@ -232,6 +233,7 @@ class SerialLink(Link):
                                          bytesize=self.bytesize,
                                          parity=self.parity,
                                          stopbits=self.stopbits)
+            self._serial.reset_output_buffer()
             LOGGER.info('new %s was initialized' % self)
 
     def settimeout(self, timeout):
@@ -273,7 +275,8 @@ class SerialLink(Link):
             data = str(data, encoding='utf8')
         except:
             pass
-        self.log("Read", data)
+        if len(data) != 0 :
+            self.log("Read", data)
         self.serial.timeout = self.timeout
         return data
 

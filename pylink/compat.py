@@ -70,6 +70,7 @@ elif is_py3:
 
     str = str
     bytes = bytes
+    basestring = bytes
 
 
 def format_unicode(s, encoding='utf-8'):

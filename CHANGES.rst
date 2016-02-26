@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+Version 0.3.3
+~~~~~~~~~~~~~
+
+- Fix the bug related to the pyserial encoding data with Python v3.x
+
 Version 0.3.2
 ~~~~~~~~~~~~~
 
